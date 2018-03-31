@@ -1,0 +1,170 @@
+<html>
+	<head>
+
+		<title>The Scheduler</title>
+
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+		<style>
+			#footer {
+				font-size: .8em;
+				color: grey;
+				font-family: monospace;
+				margin-bottom: 0px;
+			}
+		</style>
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+		<script>
+			$(function() {
+				$("#submitbutton").click(function(event) {
+					
+					data = {};
+
+					% for i in range(1, 10):
+
+						var checkboxes = document.getElementsByName('inlineCheckbox-${i}[]');
+						var vals = "";
+						for (var i = 0, n = checkboxes.length; i < n; i++)  {
+							if (checkboxes[i].checked) {
+						        vals += " " + checkboxes[i].value;
+						    }
+						}
+
+						if (vals) {
+							vals = vals.substring(1);
+						}
+
+						data["class${i}-name"] = $("input[name=class-${i}]").val();
+						data["class${i}-offered"] = vals;
+
+
+					% endfor
+
+					$("#content").load("/newajax.pyhtml", data);
+					event.preventDefault();
+				});
+			});
+		</script>
+	</head>
+
+	<body>
+
+		<div class="container-fluid">
+
+			<div class="row">
+
+				<div class="col-sm-4"></div>
+
+				<div class="col-sm-4">
+					<center>
+						<h2>The Scheduler</h2>
+						<p id="footer">Niles Rogoff 2016; Updated by Ethan Sattler 2017</p>
+					</center>
+				</div>
+
+			</div>
+				
+			<div class="row" style="padding-top: 2%">
+				<div class="col-sm-3"></div>
+				<div class="col-sm-6">
+					<center>
+						<p style="margin-bottom: 0px">Type the class name and check all blocks the class is offered.</p>
+						<p style="margin-bottom: 0px">Then click "schedule me".</p>
+					</center>
+				</div>
+			</div>
+	
+			<hr style="margin-top: 10px; margin-bottom: 10px">
+
+
+			<div id="content">
+			</div>
+
+			<div class="row">
+
+				<div class="col-sm-2"></div>
+
+				<div class="col-sm-2">
+					<center>
+						<b>Class</b>
+					</center>
+				</div>
+
+				<div class="col-sm-6">
+					<center>
+						<b>Blocks Offered</b>
+					</center>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-sm-2"></div>
+
+				<div class="col-sm-6">
+					<hr style="margin-bottom: 10px; margin-top: 10px; width: 122%">
+				</div>
+			</div>
+
+			<form>
+				% for x in range(1,10):
+				<div class="row">
+
+					<div class="col-sm-2"></div>
+
+					<div class="col-sm-2" style="padding-right: 0px;">
+						<center>
+							<input style="width: 100%" class="form-control" type="text" name="class-${x}" placeholder="Class Name">
+						</center>
+					</div>
+
+					<div class="col-sm-6" style="padding-left: 0px; padding-top: 6px">
+						<center>
+							<label class="checkbox-inline">
+								<input type="checkbox" name="inlineCheckbox-${x}[]" value="8:20"> 8:20
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox" name="inlineCheckbox-${x}[]" value="A"> A
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox" name="inlineCheckbox-${x}[]" value="B"> B
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox" name="inlineCheckbox-${x}[]" value="C"> C
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox" name="inlineCheckbox-${x}[]" value="D"> D
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox" name="inlineCheckbox-${x}[]" value="E"> E
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox" name="inlineCheckbox-${x}[]" value="F"> F
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox" name="inlineCheckbox-${x}[]" value="G"> G
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox" name="inlineCheckbox-${x}[]" value="H"> H
+							</label>
+						</center>
+					</div>
+				</div>
+				<br />
+				% endfor
+
+				<div class="row">
+					<div class="col-sm-4"></div>
+
+					<div class="col-sm-4">
+						<button id="submitbutton" class="btn btn-primary" style="width: 100%">Schedule Me!</button>
+					</div>
+				</div>
+			</form>
+		</div>
+
+	</body>
+
+</html>

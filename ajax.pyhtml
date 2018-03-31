@@ -1,0 +1,128 @@
+<!doctype html>
+<%!
+	import json, subprocess, copy
+	import string, sys, collections
+%>
+<%
+	def generate(classes):
+####	classes = {
+####			  "Engineering": ["h"]
+####			, "AP Physics" : ["a", "b"]
+####			, "AP Spanish" : ["b", "g"]
+####			, "BC AP Calc" : ["8:20", "c"]
+####			, "English AP" : ["b", "d", "f", "e"]
+####			, "Orchestra"  : ["e", "8:20"]
+####			, "US History" : ["e", "g"]
+####			}
+		result = ''
+		errors = []
+		newclasses = []
+		schedule = {"8:20": ""}
+		pseudoschedule = {}
+		for f in string.ascii_lowercase[:8]:
+			schedule[f] = ""
+		#for class_l in classes.items():
+		#    for block in class_l[1]:
+		#        if not block in schedule:
+		#            result += str("BLOCK ERROR")
+		#            return
+		for class_l in classes.items():
+			pseudoschedule[class_l[0]] = []
+		maximum = 0
+		for class_l in classes.items():
+			maximum = max(len(class_l[1]), maximum)
+		# maximum is now set to the number of blocks offered for the class with the largest number of blocks offered
+		# this loop starts with the classes offered at the fewest number of blocks (usually 1) and works up to the largest
+		for i in range(maximum):
+			for class_l in classes.items():
+				if len(class_l[1]) == i+1:
+					newclasses.append(class_l) # if the length of the blocks offered is equal to i+1, append it to the end of newclasses. All classes will be added, but the order matters
+		for class_l in newclasses: # this loops through all classes but now starting with the fewest blocks offered to the most
+			available_blocks = []
+			for block_offered in class_l[1]:
+				block_offered = block_offered.lower()
+				try:
+					if schedule[block_offered] == "":
+						available_blocks.append(block_offered)
+				except:
+					result += str("<div class='error'>ERROR - \"" + block_offered + "\" is not a valid block. Make sure you're spelling \"8:20\" correctly. </div>")
+			# At this point, we know all of the blocks where they could take this class, i.e. is not in use by another class
+			if len(available_blocks) == 0: # if it can't be taken at any blocks, yell at the user
+				errors.append(class_l[0])
+				continue
+			if len(available_blocks) == 1: # if it can only be taken at one block, add it directly to the schedule
+				schedule[available_blocks[0]] = class_l[0]
+			else:
+				pseudoschedule[class_l[0]] = available_blocks # otherwise, add all the blocks we could take it to the classes value in psuedoschedule
+			# The reason Ethan and Bryan were not able to make a working scheduler is because they could not see why they needed the next 10 lines
+			for x in pseudoschedule.items(): # for everything already in psuedoschedule
+				if x[1] == []:
+					continue
+				blocks_left = [] # check to see if it can only be taken at one block now, because we may have changed the schedule since last time we checked
+				for block_left in x[1]:
+					if schedule[block_left] == "":
+						blocks_left.append(block_left)
+				if len(blocks_left) == 1:
+					schedule[blocks_left[0]] = x[0] # If so, add it to the schedule
+					pseudoschedule[x[0]] = [] # and remove it from the psuedoschedule so we don't get confused
+		# at this point, all the things that must be taken at a particular block are in the schedule
+		ps2 = copy.deepcopy(pseudoschedule) # I don't remember what ps2 is for, I'm going back through and commenting this a year after I actually wrote it
+		for class_k in pseudoschedule:
+			if pseudoschedule[class_k] == []:
+				del ps2[class_k]
+		#result += str(json.dumps([schedule,ps2,errors]))
+		final = collections.defaultdict(lambda: ["error", []])
+		for block_l in schedule.items():
+			if block_l[1] == "":
+				continue
+			final[block_l[0]] = [True, block_l[1]]
+		# all things in the schedule have now been put in final, stored as a list of [Boolean True, String block it must be taken]
+		for class_l in ps2.items():
+			for block in class_l[1]:
+				final[block][0] = False
+				final[block][1].append(class_l[0])
+		# all things in the psuedoschedule have now been put in final, stored as a list of [Boolean False, List of Strings [blocks it can be taken]]
+		# From here down is rendering code
+		for error in errors:
+			result += str("""<div class="error">ERROR - Could not add class """ + error + """ - Invalid Block or Scheduling Conflict</div><br />""")
+		for class_sl in sorted(final):
+			current_line = "<div class=\"block"
+			if final[class_sl][0]:
+				current_line += " fixed"
+			current_line += "\">"
+			current_line += class_sl.upper()
+			current_line += "</div><div class=\"class"
+			if final[class_sl][0]:
+				current_line += " fixed"
+			if final[class_sl][0]:
+				current_line += "\">"+final[class_sl][1]
+			else:
+				current_line += "\">"
+				for class_s in final[class_sl][1]:
+					if not final[class_sl][1].index(class_s) == 0:
+						current_line += " OR "
+					current_line += class_s
+			current_line += "</div>"
+			result += str(current_line)
+		return str(result)
+	# Function definition just ended
+	response = False
+	master = {}
+	try:
+		for x in range(1, 10):
+			key = d["class" + str(x) + "-name"]
+			value = d["class" + str(x) + "-offered"].split()
+			keys = [x[0] for x in master.items()]
+			if key in keys and key != '':
+				response = "<div class='error'>You have a duplicate class. Class names must be unique</div>"
+			master[key] = value
+	except:
+		response = "Invalid form input"
+		return
+	for item_l in copy.deepcopy(master).items():
+		if item_l[0] == "":
+			del master[item_l[0]]
+	if not response:
+		response = generate(master)
+%>
+${response}
